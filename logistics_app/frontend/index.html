@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление логистикой</title>
+    <link rel="stylesheet" href="/logistics_app/frontend/style.css">
+</head>
+<body>
+    <header>
+        <h1>🚚 Система управления логистикой</h1>
+        <div class="header-actions">
+            <button id="settingsBtn">⚙️ Настройки</button>
+            <button id="exportBtn">📥 Экспорт CSV</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Калькулятор стоимости -->
+        <section class="card calc-card">
+            <h2>📐 Калькулятор доставки</h2>
+            <div class="calc-form">
+                <input type="number" id="calcDistance" placeholder="Расстояние (км)" min="1" step="0.1">
+                <button id="calcBtn">Рассчитать</button>
+            </div>
+            <div id="calcResult" class="calc-result hidden">
+                Тариф: <span id="calcTariff">0</span> ₽/км | Стоимость: <span id="calcCost">0</span> ₽
+            </div>
+        </section>
+
+        <!-- Форма добавления заявки -->
+        <section class="card">
+            <h2>➕ Новая заявка</h2>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="client">Заказчик:</label>
+                    <input type="text" id="client" required placeholder="ООО Пример">
+                </div>
+                <div class="form-group">
+                    <label for="route">Маршрут:</label>
+                    <input type="text" id="route" required placeholder="Москва → Казань">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weight">Вес груза (кг):</label>
+                        <input type="number" id="weight" min="0.1" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cost">Стоимость (₽):</label>
+                        <input type="number" id="cost" placeholder="Из калькулятора" step="0.01">
+                    </div>
+                </div>
+                <button type="submit">Сохранить заявку</button>
+            </form>
+        </section>
+
+        <!-- Фильтры и статистика -->
+        <section class="card filters-card">
+            <h2>📊 Статистика и поиск</h2>
+            <div class="filters">
+                <input type="text" id="searchInput" placeholder="🔍 Поиск по заказчику...">
+                <select id="statusFilter">
+                    <option value="all">Все статусы</option>
+                    <option value="новый">Новые</option>
+                    <option value="в пути">В пути</option>
+                    <option value="доставлен">Доставлены</option>
+                </select>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item"><span class="stat-value" id="statTotal">0</span><span class="stat-label">Всего</span></div>
+                <div class="stat-item"><span class="stat-value" id="statWeight">0 кг</span><span class="stat-label">Общий вес</span></div>
+            </div>
+            <div class="chart-container"><canvas id="statusChart"></canvas></div>
+        </section>
+
+        <!-- Таблица -->
+        <section class="card table-card">
+            <h2>📋 Список заявок</h2>
+            <table id="ordersTable">
+                <thead>
+                    <tr><th>ID</th><th>Дата</th><th>Заказчик</th><th>Маршрут</th><th>Вес</th><th>Статус</th><th>Стоимость</th><th>Действия</th></tr>
+                </thead>
+                <tbody id="ordersBody"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Модальное окно настроек -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>⚙️ Настройки системы</h2>
+            <label>Тариф (₽/км): <input type="number" id="setTariff" step="0.1"></label>
+            <label>Название компании: <input type="text" id="setCompany"></label>
+            <div class="modal-actions">
+                <button id="saveSettings">Сохранить</button>
+                <button id="closeSettings" class="secondary">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/logistics_app/frontend/libs/chart.umd.js"></script>
+    <script src="/logistics_app/frontend/app.js"></script>
+</body>
+</html>
