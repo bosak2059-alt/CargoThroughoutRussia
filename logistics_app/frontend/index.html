@@ -2,103 +2,144 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление логистикой</title>
-    <link rel="stylesheet" href="/logistics_app/frontend/style.css">
+    <title>Логистика v3.0</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>🚚 Система управления логистикой</h1>
+        <h1>🚚 Управление логистикой</h1>
         <div class="header-actions">
-            <button id="settingsBtn">⚙️ Настройки</button>
-            <button id="exportBtn">📥 Экспорт CSV</button>
+            <button id="themeBtn" title="Тема">🌙</button>
+            <button id="printBtn">🖨️ Печать</button>
+            <button id="exportBtn">📤 Экспорт</button>
+            <button id="importBtn">📥 Импорт</button>
         </div>
     </header>
 
+    <nav class="tabs">
+        <button class="tab-btn active" data-tab="orders">📋 Заявки</button>
+        <button class="tab-btn" data-tab="vehicles">🚚 Транспорт</button>
+        <button class="tab-btn" data-tab="logs">📝 Журнал</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Настройки</button>
+    </nav>
+
     <main class="container">
-        <!-- Калькулятор стоимости -->
-        <section class="card calc-card">
-            <h2>📐 Калькулятор доставки</h2>
-            <div class="calc-form">
-                <input type="number" id="calcDistance" placeholder="Расстояние (км)" min="1" step="0.1">
-                <button id="calcBtn">Рассчитать</button>
-            </div>
-            <div id="calcResult" class="calc-result hidden">
-                Тариф: <span id="calcTariff">0</span> ₽/км | Стоимость: <span id="calcCost">0</span> ₽
-            </div>
-        </section>
-
-        <!-- Форма добавления заявки -->
-        <section class="card">
-            <h2>➕ Новая заявка</h2>
-            <form id="orderForm">
-                <div class="form-group">
-                    <label for="client">Заказчик:</label>
-                    <input type="text" id="client" required placeholder="ООО Пример">
+        <!-- Вкладка: Заявки -->
+        <section id="tab-orders" class="tab-content active">
+            <div class="grid-2">
+                <div class="card">
+                    <h2>➕ Новая заявка</h2>
+                    <form id="orderForm">
+                        <div class="form-group"><label>Заказчик:</label><input type="text" id="client" required placeholder="ООО Пример"></div>
+                        <div class="form-group"><label>Маршрут:</label><input type="text" id="route" required placeholder="Москва → Казань"></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Вес (кг):</label><input type="number" id="weight" min="0.1" step="0.1" required></div>
+                            <div class="form-group"><label>ТС:</label><select id="vehicleSelect"></select></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Стоимость (₽):</label><input type="number" id="cost" step="0.01"></div>
+                            <div class="form-group"><label>Время доставки:</label><input type="text" id="deliveryTime" readonly placeholder="Авто"></div>
+                        </div>
+                        <button type="submit">Сохранить</button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="route">Маршрут:</label>
-                    <input type="text" id="route" required placeholder="Москва → Казань">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="weight">Вес груза (кг):</label>
-                        <input type="number" id="weight" min="0.1" step="0.1" required>
+                <div class="card">
+                    <h2>📐 Калькулятор</h2>
+                    <div class="calc-form">
+                        <input type="number" id="calcDist" placeholder="Расстояние (км)" min="1">
+                        <button id="calcBtn">Рассчитать</button>
                     </div>
-                    <div class="form-group">
-                        <label for="cost">Стоимость (₽):</label>
-                        <input type="number" id="cost" placeholder="Из калькулятора" step="0.01">
-                    </div>
+                    <div id="calcResult" class="calc-result hidden"></div>
                 </div>
-                <button type="submit">Сохранить заявку</button>
-            </form>
+            </div>
+
+            <div class="card filters-card">
+                <div class="filters">
+                    <input type="text" id="searchInput" placeholder="🔍 Поиск...">
+                    <select id="statusFilter"><option value="all">Все статусы</option><option value="новый">Новые</option><option value="в пути">В пути</option><option value="доставлен">Доставлены</option></select>
+                    <input type="date" id="dateStart"> <input type="date" id="dateEnd">
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item"><span class="stat-value" id="statTotal">0</span><span class="stat-label">Всего</span></div>
+                    <div class="stat-item"><span class="stat-value" id="statWeight">0 кг</span><span class="stat-label">Общий вес</span></div>
+                </div>
+                <div class="chart-container"><canvas id="statusChart"></canvas></div>
+            </div>
+
+            <div class="card table-card">
+                <h2>📋 Список</h2>
+                <table id="ordersTable">
+                    <thead><tr><th>ID</th><th>Дата</th><th>Заказчик</th><th>ТС</th><th>Вес</th><th>Статус</th><th>Стоимость</th><th>Действия</th></tr></thead>
+                    <tbody id="ordersBody"></tbody>
+                </table>
+            </div>
         </section>
 
-        <!-- Фильтры и статистика -->
-        <section class="card filters-card">
-            <h2>📊 Статистика и поиск</h2>
-            <div class="filters">
-                <input type="text" id="searchInput" placeholder="🔍 Поиск по заказчику...">
-                <select id="statusFilter">
-                    <option value="all">Все статусы</option>
-                    <option value="новый">Новые</option>
-                    <option value="в пути">В пути</option>
-                    <option value="доставлен">Доставлены</option>
-                </select>
+        <!-- Вкладка: Транспорт -->
+        <section id="tab-vehicles" class="tab-content">
+            <div class="card">
+                <h2>🚚 Добавить ТС</h2>
+                <form id="vehicleForm" class="inline-form">
+                    <input type="text" id="vName" placeholder="Название (Газель)" required>
+                    <input type="number" id="vCap" placeholder="Грузоподъёмность (кг)" required>
+                    <input type="number" id="vSpeed" placeholder="Ср. скорость (км/ч)" required>
+                    <button type="submit">Добавить</button>
+                </form>
+                <table id="vehiclesTable"><thead><tr><th>ID</th><th>Название</th><th>Грузоподъёмность</th><th>Скорость</th><th>Действия</th></tr></thead><tbody id="vehiclesBody"></tbody></table>
             </div>
-            <div class="stats-grid">
-                <div class="stat-item"><span class="stat-value" id="statTotal">0</span><span class="stat-label">Всего</span></div>
-                <div class="stat-item"><span class="stat-value" id="statWeight">0 кг</span><span class="stat-label">Общий вес</span></div>
-            </div>
-            <div class="chart-container"><canvas id="statusChart"></canvas></div>
         </section>
 
-        <!-- Таблица -->
-        <section class="card table-card">
-            <h2>📋 Список заявок</h2>
-            <table id="ordersTable">
-                <thead>
-                    <tr><th>ID</th><th>Дата</th><th>Заказчик</th><th>Маршрут</th><th>Вес</th><th>Статус</th><th>Стоимость</th><th>Действия</th></tr>
-                </thead>
-                <tbody id="ordersBody"></tbody>
-            </table>
+        <!-- Вкладка: Журнал -->
+        <section id="tab-logs" class="tab-content">
+            <div class="card">
+                <h2>📝 История изменений</h2>
+                <table id="logsTable"><thead><tr><th>Время</th><th>Действие</th><th>№ Заявки</th><th>Детали</th></tr></thead><tbody id="logsBody"></tbody></table>
+            </div>
+        </section>
+
+        <!-- Вкладка: Настройки -->
+        <section id="tab-settings" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h2>⚙️ Параметры</h2>
+                    <label>Тариф (₽/км): <input type="number" id="setTariff" step="0.1"></label>
+                    <button id="saveSettings" class="mt">Сохранить тариф</button>
+                </div>
+                <div class="card">
+                    <h2>💾 Резервное копирование</h2>
+                    <button id="createBackup">Создать бэкап</button>
+                    <select id="backupSelect" class="mt"></select>
+                    <button id="restoreBackup" class="mt">Восстановить из файла</button>
+                    <small class="hint">* После восстановления перезапустите приложение</small>
+                </div>
+            </div>
         </section>
     </main>
 
-    <!-- Модальное окно настроек -->
-    <div id="settingsModal" class="modal hidden">
+    <!-- Модальное окно редактирования -->
+    <div id="editModal" class="modal hidden">
         <div class="modal-content">
-            <h2>⚙️ Настройки системы</h2>
-            <label>Тариф (₽/км): <input type="number" id="setTariff" step="0.1"></label>
-            <label>Название компании: <input type="text" id="setCompany"></label>
+            <h2>✏️ Редактирование</h2>
+            <input type="hidden" id="editId">
+            <div class="form-group"><label>Заказчик:</label><input type="text" id="editClient"></div>
+            <div class="form-group"><label>Маршрут:</label><input type="text" id="editRoute"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Вес:</label><input type="number" id="editWeight" step="0.1"></div>
+                <div class="form-group"><label>Стоимость:</label><input type="number" id="editCost" step="0.01"></div>
+            </div>
             <div class="modal-actions">
-                <button id="saveSettings">Сохранить</button>
-                <button id="closeSettings" class="secondary">Закрыть</button>
+                <button id="saveEdit">Сохранить</button>
+                <button id="closeEdit" class="secondary">Отмена</button>
             </div>
         </div>
     </div>
 
-    <script src="/logistics_app/frontend/libs/chart.umd.js"></script>
-    <script src="/logistics_app/frontend/app.js"></script>
+    <input type="file" id="importInput" accept=".json,.csv" class="hidden">
+    <div id="toastContainer"></div>
+
+    <script src="app.js"></script>
+    <script src="./libs/autotable.min.js"></script>
+    <script src="./libs/chart.umd.js"></script>
+    <script src="./libs/jspdf.umd.min.js"></script>
 </body>
 </html>
