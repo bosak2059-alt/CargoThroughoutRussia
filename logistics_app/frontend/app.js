@@ -1,7 +1,11 @@
 let chartInstance = null, currentOrders = [], currentVehicles = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await initTheme();
+    // await initTheme();
+    if (window.pywebview){
+        initTheme()
+    }
+
     await loadAll();
     setupTabs();
     setupForm();
