@@ -2,7 +2,7 @@ import json, os, sys, csv, io, shutil
 from datetime import datetime
 import webview
 
-# --- Настройка путей ---
+# === Настройка путей ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
@@ -12,7 +12,7 @@ DATA_FILE = os.path.join(BASE_DIR, "data.json")
 BACKUP_DIR = os.path.join(BASE_DIR, "backups")
 os.makedirs(BACKUP_DIR, exist_ok=True)
 
-# --- Работа с данными ---
+# === Работа с данными ===
 def load_data():
     if not os.path.exists(DATA_FILE):
         default = {
@@ -29,8 +29,9 @@ def load_data():
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
-    except:
-        return load_data() # Сброс при ошибке чтения
+    except Exception as e:
+        print(f"Ошибка чтения data.json: {e}")
+        return load_data()
 
 def save_data(data):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -48,42 +49,28 @@ def log_action(action, order_id, details):
         data["logs"] = data["logs"][-500:]
     save_data(data)
 
-# --- API Класс ---
+# === API Класс ===
 class API:
-    def get_orders(self): 
-        return load_data().get("orders", [])
-    
-    def get_vehicles(self): 
-        return load_data().get("vehicles", [])
-    
-    def get_logs(self): 
-        return load_data().get("logs", [])
-    
-    def get_settings(self): 
-        return load_data().get("settings", {})
+    def get_orders(self): return load_data().get("orders", [])
+    def get_vehicles(self): return load_data().get("vehicles", [])
+    def get_logs(self): return load_data().get("logs", [])
+    def get_settings(self): return load_data().get("settings", {})
 
-    # === ВОТ ЭТОГО МЕТОДА НЕ ХВАТАЛО ===
     def get_stats(self):
         orders = load_data().get("orders", [])
         statuses = {"новый": 0, "в пути": 0, "доставлен": 0}
         total_weight = 0
         for o in orders:
             st = o.get("status", "новый")
-            if st in statuses:
-                statuses[st] += 1
+            if st in statuses: statuses[st] += 1
             total_weight += float(o.get("weight", 0))
-        return {
-            "total": len(orders), 
-            "weight": total_weight, 
-            "statuses": statuses
-        }
+        return {"total": len(orders), "weight": total_weight, "statuses": statuses}
 
     def add_order(self, order):
         data = load_data()
         order["id"] = len(data["orders"]) + 1
         order["date"] = datetime.now().strftime("%d.%m.%Y")
         
-        # Проверка веса
         vehicle = next((v for v in data["vehicles"] if v["id"] == order.get("vehicle_id")), None)
         if vehicle and order["weight"] > vehicle["capacity"]:
             return {"success": False, "message": f"Вес превышает грузоподъёмность ({vehicle['capacity']} кг)"}
@@ -140,7 +127,8 @@ class API:
 
     def update_theme(self, theme):
         d = load_data()
-        d.setdefault("settings", {})["theme"] = theme
+        if "settings" not in d: d["settings"] = {}
+        d["settings"]["theme"] = theme
         save_data(d)
         return {"success": True}
 
@@ -192,8 +180,8 @@ class API:
 
 if __name__ == "__main__":
     if not os.path.exists(HTML_PATH):
-        print(f"Ошибка: index.html не найден в {HTML_PATH}")
+        print(f"❌ Ошибка: index.html не найден по пути {HTML_PATH}")
     else:
         api = API()
-        window = webview.create_window(title="Логистика v3.0", url=HTML_PATH, js_api=api, width=1250, height=850)
+        window = webview.create_window(title="Логистика v3.0", url=HTML_PATH, js_api=api, width=1250, height=850, resizable=True)
         webview.start()
