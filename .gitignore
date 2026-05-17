@@ -1,2 +1,5 @@
+.gitignore
 data.json
 backups/
+fonts/
+saves_exports/
