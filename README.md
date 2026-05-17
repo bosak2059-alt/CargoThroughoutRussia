@@ -73,7 +73,7 @@ python main.py
 ### Ручная сборка
 
 ```
-pyinstaller --onefile --windowed --name LogisticsApp --add-data "frontend;frontend" --icon logo.png main.py
+pyinstaller --onefile --windowed --name DigitalLogistics --add-data "frontend;frontend" --icon logo.png main.py
 ```
 
 | Флаг | Описание | 
