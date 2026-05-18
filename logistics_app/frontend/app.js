@@ -391,69 +391,6 @@ async function setupPDF() {
     };
 }
 
-// function setupPDF() {
-//     window.genPDF = async (id) => {
-//         const o = currentOrders.find(x => x.id === id);
-//         if (!o) return;
-        
-//         const s = await window.pywebview.api.get_settings();
-//         const doc = new jspdf.jsPDF();
-//         doc.setFontSize(16);
-//         doc.text(s.company_name || "Логистик-Про", 20, 20);
-//         doc.setFontSize(12);
-//         doc.text(`Накладная №${o.id} от ${o.date}`, 20, 30);
-//         doc.autoTable({
-//             startY: 40,
-//             body: [
-//                 ["Заказчик", o.client], ["Маршрут", o.route],
-//                 ["Перевозчик", o.carrier || "-"], ["Водитель", o.driver || "-"],
-//                 ["Дата погр.", o.loading_date || "-"], ["Вес", `${o.weight} кг`],
-//                 ["Стоимость", `${o.cost || 0} ₽`], ["Статус", o.status]
-//             ]
-//         });
-
-//         // 🔁 ЗАМЕНА: вместо doc.save() получаем base64 и отдаём Python
-//         try {
-//             const pdfBase64 = doc.output('datauristring');
-//             const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-//             const filename = `nakladnaya_${o.id}_${dateStr}.pdf`;
-            
-//             const res = await window.pywebview.api.save_pdf_export(pdfBase64, filename);
-//             if (res.success) {
-//                 showToast(`✅ PDF сохранён: exports/${filename}`, "success");
-//             } else {
-//                 showToast("❌ Ошибка сохранения PDF", "error");
-//             }
-//         } catch (err) {
-//             console.error(err);
-//             showToast("❌ Ошибка генерации PDF", "error");
-//         }
-//     };
-// }
-
-// function setupPDF() {
-//     window.genPDF = async (id) => {
-//         const o = currentOrders.find(x => x.id === id);
-//         const s = await window.pywebview.api.get_settings();
-//         const doc = new jspdf.jsPDF();
-//         doc.setFontSize(16); 
-//         doc.text(s.company_name || "Логистик-Про", 20, 20);
-//         doc.setFontSize(12); 
-//         doc.text(`Накладная №${o.id} от ${o.date}`, 20, 30);
-//         doc.autoTable({ 
-//             startY: 40, 
-//             body: [
-//                 ["Заказчик", o.client], ["Маршрут", o.route], 
-//                 ["Перевозчик", o.carrier || "-"], ["Водитель", o.driver || "-"],
-//                 ["Дата погр.", o.loading_date || "-"], ["Вес", `${o.weight} кг`], 
-//                 ["Стоимость", `${o.cost || 0} ₽`], ["Статус", o.status]
-//             ] 
-//         });
-//         doc.save(`nakladnaya_${o.id}.pdf`); 
-//         showToast("PDF сохранён", "success");
-//     };
-// }
-
 function setupImportExport() {
     document.getElementById("exportBtn").onclick = async () => {
         const csv = await window.pywebview.api.export_csv();
@@ -493,29 +430,6 @@ function setupImportExport() {
         } catch(err) { showToast("Ошибка импорта", "error"); }
         e.target.value = "";
     };
-    // document.getElementById("importBtn").onclick = () => document.getElementById("importInput").click();
-    // document.getElementById("importInput").onchange = async (e) => {
-    //     const f = e.target.files[0]; 
-    //     if (!f) return;
-    //     try {
-    //         let orders = [];
-    //         if (f.name.endsWith(".json")) orders = JSON.parse(await f.text());
-    //         else if (f.name.endsWith(".csv")) {
-    //             const lines = (await f.text()).trim().split("\n");
-    //             for (let i = 1; i < lines.length; i++) {
-    //                 const [id, date, client, route, weight, carrier, loading_date, driver, vehicle_id, status, cost] = lines[i].split(",");
-    //                 orders.push({
-    //                     id: Number(id), date, client, route, weight: Number(weight),
-    //                     carrier, loading_date, driver, vehicle_id: Number(vehicle_id), status, cost: Number(cost)
-    //                 });
-    //             }
-    //         }
-    //         await window.pywebview.api.import_orders(orders); 
-    //         loadAll(); 
-    //         showToast("Импортировано", "success");
-    //     } catch(err) { showToast("Ошибка импорта", "error"); }
-    //     e.target.value = "";
-    // };
 }
 
 function renderStats(s) { 

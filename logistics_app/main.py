@@ -216,7 +216,7 @@ class API:
             base64_pdf = base64_pdf.split(",")[1]
         pdf_bytes = base64.b64decode(base64_pdf)
         filepath = os.path.join(EXPORTS_DIR, filename)
-        with open(filepath, "wb") as f:
+        with open(filepath, "wb", encoding='UTF-8') as f:
             f.write(pdf_bytes)
         return {"success": True, "filepath": filepath}
 
