@@ -222,7 +222,7 @@ class API:
 
 if __name__ == "__main__":
     if not os.path.exists(HTML_PATH):
-        print(f"❌ Ошибка: index.html не найден по пути {HTML_PATH}")
+        print(f"Ошибка: index.html не найден по пути {HTML_PATH}")
         sys.exit(1)
     api = API()
     window = webview.create_window(title="Цифровая Логистика v-Alfa", url=HTML_PATH, js_api=api, width=1250, height=850, resizable=True)
